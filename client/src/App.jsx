@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import StartScreen from './components/StartScreen'
 import Lobby from './components/Lobby'
 import PrepScreen from './components/PrepScreen'
 import BattleArena from './components/BattleArena'
 import ResultScreen from './components/ResultScreen'
 import LoadingScreen from './components/LoadingScreen'
+import { IMAGES_TO_PRELOAD } from './constants/assets'
 
 // Scrabble tile points distribution
 const LETTER_POINTS = {
@@ -816,6 +817,12 @@ function App() {
           </div>
         </div>
       )}
+      {/* Hidden container to keep all preloaded images active in DOM and prevent Vercel 304/reload flashes */}
+      <div style={{ display: 'none' }} aria-hidden="true">
+        {IMAGES_TO_PRELOAD.map((src) => (
+          <img key={src} src={src} alt="" />
+        ))}
+      </div>
     </div>
   )
 }

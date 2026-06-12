@@ -1,131 +1,99 @@
-import React, { useState, useEffect } from 'react';
-
-const IMAGES_TO_PRELOAD = [
-  // Backgrounds
-  '/images/Background/blue_sea.png',
-  '/images/Background/blue_sea_fm.png',
-  '/images/Background/red_sea.png',
-  '/images/Background/red_sea_fm.png',
-  '/images/Background/Tartarus colored trans.png',
-  '/images/Background/Tartarus_f1.png',
-  '/images/Background/Tartarus_f1_1.png',
-  '/images/Background/tartarus_full_moon.png',
-  '/images/Tartarus_f1_1.png',
-
-  // MC idle & status
-  '/images/MC/idle1.png',
-  '/images/MC/idle2.png',
-  '/images/MC_emo/mc_idle_emo.png',
-  '/images/MC_emo/mc_hurt_emo.png',
-  '/images/MC_emo/mc_surprise_emo.png',
-
-  // MC sigh
-  '/images/MC/sigh1.png',
-  '/images/MC/sigh2.png',
-  '/images/MC/sigh3.png',
-  '/images/MC/sigh4.png',
-
-  // Orpheus
-  '/images/Orpheus/Orpheus/1.png',
-  '/images/Orpheus/Orpheus/2.png',
-  '/images/Orpheus/Orpheus/3.png',
-  '/images/Orpheus/Orpheus/4.png',
-
-  // Shadow mud
-  '/images/Shadow/Shad_mud1/Idle_loop/Idle1mud.png',
-  '/images/Shadow/Shad_mud1/Idle_loop/Idle2mud.png',
-  '/images/Shadow/Shad_mud1/Idle_loop/Idle3mud.png',
-  '/images/Shadow/Shad_mud1/being_hit_loop/being_hit1mud.png',
-  '/images/Shadow/Shad_mud1/being_hit_loop/being_hit2mud.png',
-
-  // MC Attacks & Skills
-  '/images/MC/call_persona1.png',
-  '/images/MC/call_persona2.png',
-  '/images/MC/call_persona3.png',
-  '/images/MC/call_persona4.png',
-  '/images/MC/call_persona5.png',
-  '/images/MC/call_persona5(1).png',
-  '/images/MC/tarot_attack1.png',
-  '/images/MC/tarot_attack2.png',
-  '/images/MC/tarot_attack3.png',
-  '/images/MC/tarot_attack4.png',
-  '/images/MC/tarot_attack5.png',
-  '/images/MC/tarot_attack6.png',
-  '/images/MC/tarot_attack7.png',
-
-  // Shadow Attacks & States
-  '/images/Shadow/Shad_mud1/mud_attack/mud_attack1.png',
-  '/images/Shadow/Shad_mud1/mud_attack/mud_attack2.png',
-  '/images/Shadow/Shad_mud1/mud_attack/mud_attack3.png',
-  '/images/Shadow/Shad_mud1/mud_attack/mud_attack4.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/ mud_defeated1.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/mud_defeated2.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/mud_defeated3.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/mud_defeated4.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/mud_defeated5.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/mud_defeated6.png',
-  '/images/Shadow/Shad_mud1/mud_defeated/mud_defeated7.png',
-
-  // Fire Spell Effects
-  ...Array.from({ length: 16 }, (_, i) => `/images/Attack_animation/Attack animation/Fire/${i + 1}.png`),
-
-  // Slash Spell Effects
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609221948.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609221951.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609221954.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609221957.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222001.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222003.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222006.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222009.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222011.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222014.png',
-  '/images/Attack_animation/Attack animation/Slash/Untitled94_20260609222017.png'
-];
+import { useState, useEffect } from 'react';
+import { IMAGES_TO_PRELOAD } from '../constants/assets';
 
 function LoadingScreen({ onComplete }) {
   const [loadedCount, setLoadedCount] = useState(0);
+  const [assetsLoaded, setAssetsLoaded] = useState(false);
   const [currentFile, setCurrentFile] = useState('Initializing preloader...');
+  const [dbStatus, setDbStatus] = useState('connecting'); // 'connecting' | 'connected' | 'waking_up' | 'error'
+  const [dbMessage, setDbMessage] = useState('Establishing connection to database...');
 
+  // 1. Image Assets Preloader
   useEffect(() => {
     let count = 0;
     const total = IMAGES_TO_PRELOAD.length;
 
     if (total === 0) {
-      onComplete();
+      setTimeout(() => setAssetsLoaded(true), 0);
       return;
     }
 
     const handleLoadProgress = (src) => {
       count++;
       setLoadedCount(count);
-      // Strip path prefix to show a cleaner filename
       const fileName = src.substring(src.lastIndexOf('/') + 1);
-      setCurrentFile(`Loaded: ${fileName}`);
+      setCurrentFile(`Loaded asset: ${fileName}`);
       
       if (count === total) {
-        // Wait a slight fraction of a second for visual satisfaction
-        setTimeout(() => {
-          onComplete();
-        }, 500);
+        setAssetsLoaded(true);
+        setCurrentFile('All assets successfully cached.');
       }
     };
 
     IMAGES_TO_PRELOAD.forEach((src) => {
       const img = new Image();
-      
-      img.onload = () => {
-        handleLoadProgress(src);
-      };
-      
+      img.onload = () => handleLoadProgress(src);
       img.onerror = () => {
         console.warn(`Failed to preload image: ${src}`);
-        handleLoadProgress(src); // Continue loading game anyway
+        handleLoadProgress(src); // Continue load sequence on fail
       };
-
       img.src = src;
     });
-  }, [onComplete]);
+  }, []);
+
+  // 2. Database Connection verification (retries to handle Render spin-up latency)
+  useEffect(() => {
+    let active = true;
+    let failCount = 0;
+
+    const checkDb = async () => {
+      if (!active) return;
+      try {
+        const response = await fetch('/api/health');
+        if (!response.ok) throw new Error('Response status error');
+        
+        const data = await response.json();
+        if (data.status === 'ok') {
+          if (active) {
+            setDbStatus('connected');
+            setDbMessage('Database connection active.');
+          }
+        } else {
+          throw new Error('Database reporting unhealthy');
+        }
+      } catch (err) {
+        if (active) {
+          failCount++;
+          console.error(err);
+          if (failCount >= 2) {
+            setDbStatus('waking_up');
+            setDbMessage('Database server is waking up... Please wait (this can take 30-50s on free hosts).');
+          } else {
+            setDbStatus('error');
+            setDbMessage('Database connection unsuccessful. Retrying...');
+          }
+          // Retry health check in 2.5 seconds
+          setTimeout(checkDb, 2500);
+        }
+      }
+    };
+
+    checkDb();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // 3. Gatekeeper: Only proceed when BOTH database is connected and assets are loaded
+  useEffect(() => {
+    if (assetsLoaded && dbStatus === 'connected') {
+      const timer = setTimeout(() => {
+        onComplete();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [assetsLoaded, dbStatus, onComplete]);
 
   const percentage = Math.floor((loadedCount / IMAGES_TO_PRELOAD.length) * 100);
 
@@ -159,7 +127,14 @@ function LoadingScreen({ onComplete }) {
           </div>
         </div>
 
+        {/* Assets preload log */}
         <p className="loading-file-log">{currentFile}</p>
+
+        {/* Database connection status HUD */}
+        <div className={`loading-db-panel db-status-${dbStatus}`}>
+          <div className="db-indicator-dot"></div>
+          <span className="loading-db-text">{dbMessage}</span>
+        </div>
       </div>
     </div>
   );

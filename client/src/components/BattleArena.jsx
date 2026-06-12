@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const LETTER_POINTS = {
   a:1, b:3, c:3, d:2, e:1, f:4, g:2, h:4, i:1, j:8, k:5, l:1, m:3,
@@ -208,62 +208,6 @@ function BattleArena({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [lettersPool, inputWord, isLocked, submitInputWord, handleSelectTile, removeLastLetter, clearInput]);
 
-  // 5. HP Drop Listener to fire Animations
-  useEffect(() => {
-    // If enemy took damage
-    if (enemyHP < prevEnemyHP.current) {
-      if (enemyHP <= 0) {
-        triggerShadowDefeat();
-      } else if (!combatLockRef.current) {
-        // Guard: only trigger attack animation if no animation is currently playing
-        const isStreakBonus = streakCount > 0 && streakCount % 3 === 0;
-        if (isStreakBonus) {
-          triggerCallPersona();
-        } else {
-          triggerTarotAttack();
-        }
-      }
-    }
-    prevEnemyHP.current = enemyHP;
-  }, [enemyHP, streakCount]);
-
-  useEffect(() => {
-    // If player took damage
-    // Guard: prevent shadow attack from overlapping with MC attack animations
-    if (playerHP < prevPlayerHP.current && !combatLockRef.current) {
-      triggerShadowAttack();
-    }
-    prevPlayerHP.current = playerHP;
-  }, [playerHP]);
-
-  // 6. Classic Mode Animation Listeners (Score increase)
-  useEffect(() => {
-    if (roundScore === 0) {
-      solvedCountRef.current = 0;
-    }
-  }, [roundScore]);
-
-  useEffect(() => {
-    if (activeMode === 'classic') {
-      if (roundScore > prevRoundScore.current) {
-        solvedCountRef.current += 1;
-        
-        // Only trigger animation every 3 word correct answer
-        if (solvedCountRef.current % 3 === 0) {
-          // Protection: only trigger if the last animation is finished
-          if (mcState === 'idle' || mcState === 'sigh') {
-            const isStreakBonus = streakCount > 0 && streakCount % 3 === 0;
-            if (isStreakBonus) {
-              triggerCallPersona();
-            } else {
-              triggerTarotAttack();
-            }
-          }
-        }
-      }
-    }
-    prevRoundScore.current = roundScore;
-  }, [roundScore, streakCount, activeMode, mcState]);
 
   // COMBAT SEQUENCES
   const playSpellEffect = (type, speed) => {
@@ -354,7 +298,7 @@ function BattleArena({
     runOrph();
   };
 
-  const triggerCallPersona = () => {
+  function triggerCallPersona() {
     clearSighAnimation();
     cleanupMcAnimation();
     combatLockRef.current = true;
@@ -398,7 +342,7 @@ function BattleArena({
     }, 195);
   };
 
-  const triggerTarotAttack = () => {
+  function triggerTarotAttack() {
     clearSighAnimation();
     cleanupMcAnimation();
     combatLockRef.current = true;
@@ -439,7 +383,7 @@ function BattleArena({
     }, 110);
   };
 
-  const triggerShadowAttack = () => {
+  function triggerShadowAttack() {
     clearSighAnimation();
     cleanupShadowAnimation();
     combatLockRef.current = true;
@@ -486,7 +430,7 @@ function BattleArena({
     }, 150);
   };
 
-  const triggerShadowDefeat = () => {
+  function triggerShadowDefeat() {
     clearSighAnimation();
     setCombatLock(true);
     setShadowState('defeated');
@@ -511,6 +455,63 @@ function BattleArena({
       }
     }, 150);
   };
+
+  // 5. HP Drop Listener to fire Animations
+  useEffect(() => {
+    // If enemy took damage
+    if (enemyHP < prevEnemyHP.current) {
+      if (enemyHP <= 0) {
+        triggerShadowDefeat();
+      } else if (!combatLockRef.current) {
+        // Guard: only trigger attack animation if no animation is currently playing
+        const isStreakBonus = streakCount > 0 && streakCount % 3 === 0;
+        if (isStreakBonus) {
+          triggerCallPersona();
+        } else {
+          triggerTarotAttack();
+        }
+      }
+    }
+    prevEnemyHP.current = enemyHP;
+  }, [enemyHP, streakCount]);
+
+  useEffect(() => {
+    // If player took damage
+    // Guard: prevent shadow attack from overlapping with MC attack animations
+    if (playerHP < prevPlayerHP.current && !combatLockRef.current) {
+      triggerShadowAttack();
+    }
+    prevPlayerHP.current = playerHP;
+  }, [playerHP]);
+
+  // 6. Classic Mode Animation Listeners (Score increase)
+  useEffect(() => {
+    if (roundScore === 0) {
+      solvedCountRef.current = 0;
+    }
+  }, [roundScore]);
+
+  useEffect(() => {
+    if (activeMode === 'classic') {
+      if (roundScore > prevRoundScore.current) {
+        solvedCountRef.current += 1;
+        
+        // Only trigger animation every 3 word correct answer
+        if (solvedCountRef.current % 3 === 0) {
+          // Protection: only trigger if the last animation is finished
+          if (mcState === 'idle' || mcState === 'sigh') {
+            const isStreakBonus = streakCount > 0 && streakCount % 3 === 0;
+            if (isStreakBonus) {
+              triggerCallPersona();
+            } else {
+              triggerTarotAttack();
+            }
+          }
+        }
+      }
+    }
+    prevRoundScore.current = roundScore;
+  }, [roundScore, streakCount, activeMode, mcState]);
 
   return (
     <div className="battle-container">
