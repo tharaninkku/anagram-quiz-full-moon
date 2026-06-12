@@ -78,6 +78,9 @@ function BattleArena({
 
   const sighIntervalRef = useRef(null);
   const sighTimeoutRef = useRef(null);
+  const combatLockRef = useRef(false);
+  const mcAnimTimerRef = useRef(null);
+  const shadowAnimTimerRef = useRef(null);
 
   const clearSighAnimation = () => {
     if (sighIntervalRef.current) {
@@ -89,6 +92,20 @@ function BattleArena({
       sighTimeoutRef.current = null;
     }
     setSighBubbleActive(false);
+  };
+
+  const cleanupMcAnimation = () => {
+    if (mcAnimTimerRef.current) {
+      clearInterval(mcAnimTimerRef.current);
+      mcAnimTimerRef.current = null;
+    }
+  };
+
+  const cleanupShadowAnimation = () => {
+    if (shadowAnimTimerRef.current) {
+      clearInterval(shadowAnimTimerRef.current);
+      shadowAnimTimerRef.current = null;
+    }
   };
 
   const isLocked = (activeMode === 'story' ? combatLock : false) || loading;
@@ -197,7 +214,8 @@ function BattleArena({
     if (enemyHP < prevEnemyHP.current) {
       if (enemyHP <= 0) {
         triggerShadowDefeat();
-      } else {
+      } else if (!combatLockRef.current) {
+        // Guard: only trigger attack animation if no animation is currently playing
         const isStreakBonus = streakCount > 0 && streakCount % 3 === 0;
         if (isStreakBonus) {
           triggerCallPersona();
@@ -211,7 +229,8 @@ function BattleArena({
 
   useEffect(() => {
     // If player took damage
-    if (playerHP < prevPlayerHP.current) {
+    // Guard: prevent shadow attack from overlapping with MC attack animations
+    if (playerHP < prevPlayerHP.current && !combatLockRef.current) {
       triggerShadowAttack();
     }
     prevPlayerHP.current = playerHP;
@@ -337,6 +356,8 @@ function BattleArena({
 
   const triggerCallPersona = () => {
     clearSighAnimation();
+    cleanupMcAnimation();
+    combatLockRef.current = true;
     setCombatLock(true);
     setMCLunge(true);
     setMCState('call');
@@ -351,7 +372,7 @@ function BattleArena({
     ];
     let currentFrame = 0;
 
-    const timer = setInterval(() => {
+    mcAnimTimerRef.current = setInterval(() => {
       if (currentFrame < callFrames.length) {
         setMCSprite(callFrames[currentFrame]);
         if (currentFrame === 3) {
@@ -362,10 +383,12 @@ function BattleArena({
         }
         currentFrame++;
       } else {
-        clearInterval(timer);
+        clearInterval(mcAnimTimerRef.current);
+        mcAnimTimerRef.current = null;
         setTimeout(() => {
           setMCLunge(false);
           setTimeout(() => {
+            combatLockRef.current = false;
             setCombatLock(false);
             setMcEmo('/images/MC_emo/mc_idle_emo.png');
             setMCState('idle');
@@ -377,6 +400,8 @@ function BattleArena({
 
   const triggerTarotAttack = () => {
     clearSighAnimation();
+    cleanupMcAnimation();
+    combatLockRef.current = true;
     setCombatLock(true);
     setMCLunge(true);
     setMCState('tarot');
@@ -392,7 +417,7 @@ function BattleArena({
     ];
     let currentFrame = 0;
 
-    const timer = setInterval(() => {
+    mcAnimTimerRef.current = setInterval(() => {
       if (currentFrame < tarotFrames.length) {
         setMCSprite(tarotFrames[currentFrame]);
         if (currentFrame === 5) {
@@ -402,9 +427,11 @@ function BattleArena({
         }
         currentFrame++;
       } else {
-        clearInterval(timer);
+        clearInterval(mcAnimTimerRef.current);
+        mcAnimTimerRef.current = null;
         setMCLunge(false);
         setTimeout(() => {
+          combatLockRef.current = false;
           setCombatLock(false);
           setMCState('idle');
         }, 200);
@@ -414,6 +441,8 @@ function BattleArena({
 
   const triggerShadowAttack = () => {
     clearSighAnimation();
+    cleanupShadowAnimation();
+    combatLockRef.current = true;
     setCombatLock(true);
     setShadowLunge(true);
     setShadowState('attack');
@@ -426,7 +455,7 @@ function BattleArena({
     ];
     let currentFrame = 0;
 
-    const timer = setInterval(() => {
+    shadowAnimTimerRef.current = setInterval(() => {
       if (currentFrame < shadowAtkFrames.length) {
         setShadowSprite(shadowAtkFrames[currentFrame]);
         if (currentFrame === 2) {
@@ -444,9 +473,11 @@ function BattleArena({
         }
         currentFrame++;
       } else {
-        clearInterval(timer);
+        clearInterval(shadowAnimTimerRef.current);
+        shadowAnimTimerRef.current = null;
         setShadowLunge(false);
         setTimeout(() => {
+          combatLockRef.current = false;
           setCombatLock(false);
           setMcEmo('/images/MC_emo/mc_idle_emo.png');
           setShadowState('idle');
