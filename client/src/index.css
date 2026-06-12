@@ -34,19 +34,33 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+html {
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+}
+
 body {
   background-color: var(--color-bg-dark);
   color: var(--color-text-light);
   font-family: var(--font-sans);
-  min-height: 100vh;
+  height: 100%;
+  height: 100dvh;
   overflow: hidden; /* Lock viewport scroll for immersive app experience */
-  position: relative;
+  position: fixed; /* Prevents iOS bounce scrolling */
+  top: 0;
+  left: 0;
+  width: 100%;
+  overscroll-behavior: none; /* Prevent pull-to-refresh and overscroll */
+  -webkit-overflow-scrolling: auto;
 }
 
 #root {
-  min-height: 100vh;
+  height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 /* Base Skewed Button styling */
@@ -361,6 +375,7 @@ body {
 .start-screen {
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   position: relative;
   background: radial-gradient(circle at 75% 20%, hsl(222, 45%, 15%) 0%, var(--color-bg-dark) 70%);
   display: flex;
@@ -368,6 +383,7 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 1;
+  overflow: hidden;
 }
 
 /* Glowing Full Moon */
@@ -461,6 +477,7 @@ body {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   background-color: rgba(6, 8, 15, 0.85);
   backdrop-filter: blur(8px);
   display: flex;
@@ -926,6 +943,7 @@ body {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   position: relative;
   z-index: 10;
@@ -933,6 +951,7 @@ body {
   background-size: cover !important;
   background-position: right center !important;
   background-repeat: no-repeat !important;
+  overflow: hidden;
 }
 
 /* TOP ARENA: RPG COMBAT AREA */
@@ -1269,7 +1288,9 @@ body {
   justify-content: space-between;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   position: relative;
+  overflow: hidden;
   /* Top half is sky, bottom half is dark sea water */
   background: linear-gradient(to bottom, 
     hsl(222, 45%, 4%) 0%, 
@@ -1778,18 +1799,15 @@ body {
    MOBILE RESPONSIVENESS MEDIA QUERIES (max-width: 768px)
    ========================================== */
 @media (max-width: 768px) {
-  /* GLOBAL STYLES */
-  body {
-    overflow-y: auto; /* Allow scrolling on pages if needed on small viewports */
-  }
+  /* GLOBAL STYLES — DO NOT re-enable overflow on body */
 
   /* START SCREEN & AUTH MODALS */
   .start-screen.view-lobby {
-    height: auto !important;
-    min-height: 100vh !important;
+    height: 100dvh !important;
     justify-content: flex-start !important;
     padding-top: 85px !important;
     padding-bottom: 30px !important;
+    overflow-y: auto !important;
   }
 
   .game-title {
@@ -1895,8 +1913,7 @@ body {
 
   /* PREPARATION SCREEN */
   .prep-container {
-    height: auto !important;
-    min-height: 90vh !important;
+    height: 90dvh !important;
     padding-bottom: 20px !important;
   }
 
@@ -1933,6 +1950,7 @@ body {
 
   /* BATTLE ARENA SCREEN */
   .battle-container {
+    height: 100dvh !important;
     background-position: center !important; /* Center Tartarus background on mobile */
     overflow: hidden !important; /* Prevent horizontal and vertical swiping/scrolling in battle */
   }
@@ -2141,6 +2159,7 @@ body {
 
   /* RESULT SCREEN */
   .result-container {
+    height: 100dvh !important;
     padding: 20px 10px !important;
   }
 
@@ -2196,12 +2215,174 @@ body {
     font-size: 0.85rem !important;
     padding: 4px 6px !important;
   }
-}
 
-/* Mobile & Tablet Sizing (max-width: 768px) */
-@media (max-width: 768px) {
+  /* Start Screen Background (Mobile) */
   .start-screen {
     background-size: auto 65% !important; /* Scale height down to 65% of screen height */
     background-position: center bottom !important; /* Push image to the bottom */
+  }
+}
+
+/* ==========================================
+   TABLET RESPONSIVENESS (iPad: 769px – 1024px)
+   ========================================== */
+@media (min-width: 769px) and (max-width: 1024px) {
+
+  /* BATTLE ARENA — iPad */
+  .battle-container {
+    height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  /* Scale down combat sprites for tablet */
+  .mc-stage-container {
+    left: 8% !important;
+    bottom: 38% !important;
+    width: 180px !important;
+    height: 280px !important;
+  }
+
+  .shadow-stage-container {
+    right: 8% !important;
+    bottom: 38% !important;
+    width: 180px !important;
+    height: 280px !important;
+  }
+
+  .mc-sprite, .shadow-sprite {
+    height: 380px !important;
+  }
+
+  .orpheus-container {
+    left: 28% !important;
+    bottom: 42% !important;
+    width: 180px !important;
+    height: 280px !important;
+  }
+
+  .orpheus-sprite {
+    height: 340px !important;
+  }
+
+  .effect-sprite {
+    height: 180px !important;
+  }
+
+  /* Bottom Arena: make it more compact on tablet */
+  .bottom-arena {
+    padding: 12px 4% !important;
+    gap: 15px !important;
+  }
+
+  .input-preview-row {
+    min-width: 400px !important;
+    max-width: 600px !important;
+  }
+
+  /* HUD Face Portrait — scale for tablet */
+  .hud-face-frame {
+    width: 180px !important;
+    height: 180px !important;
+    left: -70px !important;
+    bottom: 40px !important;
+  }
+
+  /* Timers Panel */
+  .timers-panel {
+    width: 130px !important;
+  }
+
+  .moon-timer-wrapper {
+    width: 60px !important;
+    height: 60px !important;
+  }
+
+  .moon-timer-text {
+    font-size: 1.1rem !important;
+  }
+
+  /* HP Panels */
+  .hp-panel {
+    width: 200px !important;
+    padding: 7px 12px !important;
+  }
+
+  .hp-label {
+    font-size: 0.75rem !important;
+  }
+
+  /* Lobby screen: keep cards side by side but smaller */
+  .mode-card {
+    width: 280px !important;
+    height: 340px !important;
+    padding: 30px 25px !important;
+  }
+
+  .mode-card-title {
+    font-size: 1.4rem !important;
+  }
+
+  /* Result Screen */
+  .result-container {
+    height: 100dvh !important;
+  }
+
+  /* Prep Screen */
+  .prep-container {
+    height: 88dvh !important;
+    margin-top: 7dvh !important;
+  }
+
+  /* Start Screen */
+  .start-screen {
+    height: 100dvh !important;
+  }
+}
+
+/* ==========================================
+   LANDSCAPE ORIENTATION FIX (short viewports)
+   ========================================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .mc-sprite, .shadow-sprite {
+    height: 180px !important;
+  }
+
+  .mc-stage-container,
+  .shadow-stage-container {
+    bottom: 50% !important;
+    width: 120px !important;
+    height: 180px !important;
+  }
+
+  .bottom-arena {
+    padding: 5px 3% !important;
+    gap: 5px !important;
+  }
+
+  .letters-keyboard .scrabble-tile {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 0.95rem !important;
+  }
+
+  .arena-actions-deck .p3-btn {
+    padding: 4px 8px !important;
+    font-size: 0.65rem !important;
+  }
+
+  .hud-face-frame {
+    width: 90px !important;
+    height: 90px !important;
+    left: -35px !important;
+    bottom: 15px !important;
+  }
+
+  .moon-timer-wrapper {
+    width: 35px !important;
+    height: 35px !important;
+  }
+
+  .moon-timer-text {
+    font-size: 0.8rem !important;
   }
 }
