@@ -44,7 +44,10 @@ function BattleArena({
   submitInputWord,
   handleRetreat,
   handleSkip,
-  loading
+  loading,
+  combatNotification,
+  playerDamageDisplay,
+  enemyDamageDisplay
 }) {
   // Sprite Frames States
   const [mcSprite, setMCSprite] = useState('/images/MC/idle1.png');
@@ -517,6 +520,12 @@ function BattleArena({
     <div className="battle-container">
       <div className={`flash-overlay ${screenFlash} ${screenFlash !== 'none' ? 'active' : ''}`}></div>
 
+      {combatNotification && (
+        <div className={`combat-notification-banner type-${combatNotification.type}`}>
+          {combatNotification.text}
+        </div>
+      )}
+
       {/* RPG Combat Stage Layer (Full Screen behind HUDs) */}
       <div className="battle-arena-stage">
         <div className={`orpheus-container ${orpheusActive ? 'active' : ''}`}>
@@ -554,6 +563,9 @@ function BattleArena({
                 <div className="hp-bar-outer">
                   <div className="hp-bar-fill" style={{ width: `${(playerHP / playerMaxHP) * 100}%` }}></div>
                 </div>
+                {playerDamageDisplay !== null && (
+                  <div className="damage-popup player-side">-{playerDamageDisplay}</div>
+                )}
               </div>
             </div>
           )}
@@ -568,6 +580,9 @@ function BattleArena({
                 <div className="hp-bar-outer">
                   <div className="hp-bar-fill" style={{ width: `${(enemyHP / enemyMaxHP) * 100}%` }}></div>
                 </div>
+                {enemyDamageDisplay !== null && (
+                  <div className="damage-popup enemy-side">-{enemyDamageDisplay}</div>
+                )}
               </div>
             </div>
           ) : (

@@ -74,6 +74,41 @@ function App() {
   const [enemyLunge, setEnemyLunge] = useState(false)
   const [inputErrorShake, setInputErrorShake] = useState(false)
 
+  const [combatNotification, setCombatNotification] = useState(null)
+  const [playerDamageDisplay, setPlayerDamageDisplay] = useState(null)
+  const [enemyDamageDisplay, setEnemyDamageDisplay] = useState(null)
+
+  const notificationTimeoutRef = useRef(null)
+  const playerDamageTimeoutRef = useRef(null)
+  const enemyDamageTimeoutRef = useRef(null)
+
+  const showCombatNotification = (text, type) => {
+    if (notificationTimeoutRef.current) clearTimeout(notificationTimeoutRef.current)
+    setCombatNotification({ text, type })
+    notificationTimeoutRef.current = setTimeout(() => {
+      setCombatNotification(null)
+      notificationTimeoutRef.current = null
+    }, 1500)
+  }
+
+  const showPlayerDamage = (amount) => {
+    if (playerDamageTimeoutRef.current) clearTimeout(playerDamageTimeoutRef.current)
+    setPlayerDamageDisplay(amount)
+    playerDamageTimeoutRef.current = setTimeout(() => {
+      setPlayerDamageDisplay(null)
+      playerDamageTimeoutRef.current = null
+    }, 1500)
+  }
+
+  const showEnemyDamage = (amount) => {
+    if (enemyDamageTimeoutRef.current) clearTimeout(enemyDamageTimeoutRef.current)
+    setEnemyDamageDisplay(amount)
+    enemyDamageTimeoutRef.current = setTimeout(() => {
+      setEnemyDamageDisplay(null)
+      enemyDamageTimeoutRef.current = null
+    }, 1500)
+  }
+
   // Timer reference to clear loops
   const gameIntervalRef = useRef(null)
 
@@ -209,8 +244,8 @@ function App() {
     setStreakCount(0)
 
     if (activeMode === 'story') {
-      // Story Mode Penalty: Deduct 5 HP
-      const nextHP = playerHP - 5
+      // Story Mode Penalty: Deduct 10 HP
+      const nextHP = playerHP - 10
       setPlayerHP(nextHP)
       playerHPRef.current = nextHP // Update synchronously!
 
@@ -422,8 +457,17 @@ function App() {
     setHeroHit(true)
     setTimeout(() => setHeroHit(false), 300)
 
-    const nextHP = playerHPRef.current - 20
+    // Calculate shadow damage based on current word length
+    const currentWord = battleWords[wordIndex]
+    const wordLength = currentWord?.letters?.length || 3
+    const basePlayerDmg = damageConfig[wordLength.toString()] || 20
+    const shadowDmg = Math.floor(basePlayerDmg / 2)
+
+    const nextHP = playerHPRef.current - shadowDmg
     setPlayerHP(Math.max(0, nextHP))
+    playerHPRef.current = Math.max(0, nextHP) // Update synchronously!
+    showPlayerDamage(shadowDmg)
+
     if (nextHP <= 0) {
       endStoryBattle(false)
     }
@@ -478,6 +522,9 @@ function App() {
       setStreakCount(nextStreak)
       const isStreakBonus = nextStreak > 0 && nextStreak % 3 === 0
 
+      // Show Correct notification
+      showCombatNotification('CORRECT!', 'correct')
+
       if (activeMode === 'story') {
         const baseDmg = damageConfig[word.length.toString()] || 15
         // If streak is a multiple of 3, deal base damage + 25 bonus damage
@@ -486,6 +533,8 @@ function App() {
         const nextHP = enemyHPRef.current - totalDmg
         setEnemyHP(Math.max(0, nextHP))
         enemyHPRef.current = Math.max(0, nextHP) // Update synchronously!
+        showEnemyDamage(totalDmg)
+        
         if (nextHP <= 0) {
           endStoryBattle(true)
         } else {
@@ -515,10 +564,22 @@ function App() {
           await loadClassicChallenge()
         }
       }
+    } else if (solvedAnswers.includes(word)) {
+      // Show Repeated Answer notification
+      showCombatNotification('DUPLICATE!', 'repeated')
+      clearInput()
     } else {
       // Shake input red on failure
       setInputErrorShake(true)
       setTimeout(() => setInputErrorShake(false), 300)
+      
+      // Show Wrong notification
+      showCombatNotification('WRONG WORD!', 'wrong')
+      
+      if (activeMode === 'story') {
+        setStreakCount(0)
+        triggerEnemyAttack()
+      }
     }
   }
 
@@ -745,6 +806,9 @@ function App() {
           handleRetreat={handleRetreat}
           handleSkip={handleSkip}
           loading={loading}
+          combatNotification={combatNotification}
+          playerDamageDisplay={playerDamageDisplay}
+          enemyDamageDisplay={enemyDamageDisplay}
         />
       )}
 

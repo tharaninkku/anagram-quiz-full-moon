@@ -38,6 +38,19 @@ async function generateWordChallenge(length) {
   }
 }
 
+// Helper to calculate progressive story mode enemy HP
+function calculateEnemyHP(floor) {
+  let hp = 100
+  for (let f = 2; f <= floor; f++) {
+    if (f % 10 === 9 || f % 10 === 0) {
+      hp += 50
+    } else {
+      hp += 10
+    }
+  }
+  return hp
+}
+
 // ==========================================
 // 1. GET CURRENT STORY CHALLENGE: GET /api/story
 // ==========================================
@@ -125,6 +138,9 @@ router.get('/', async (req, res) => {
       ])
     }
 
+    // Override with progressive shadow HP scaling formula
+    enemyHP = calculateEnemyHP(currentFloor)
+
     // Run the word queries in parallel
     const battleWords = await wordChainPromise
 
@@ -137,12 +153,12 @@ router.get('/', async (req, res) => {
       enemyMaxHP: enemyHP,
       timeLimit: timeLimit,
       damageConfig: {
-        "3": 15, // make a cap for all-out-attack dmg. If we use 20, I think the shadow will die quickly
+        "3": 20,
         "4": 30,
         "5": 50,
-        "6": 75,
-        "7": 100,
-        "8": 100
+        "6": 80,
+        "7": 110,
+        "8": 150
       },
       battleWords: battleWords
     })
