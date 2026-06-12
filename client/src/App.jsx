@@ -4,6 +4,7 @@ import Lobby from './components/Lobby'
 import PrepScreen from './components/PrepScreen'
 import BattleArena from './components/BattleArena'
 import ResultScreen from './components/ResultScreen'
+import LoadingScreen from './components/LoadingScreen'
 
 // Scrabble tile points distribution
 const LETTER_POINTS = {
@@ -12,8 +13,8 @@ const LETTER_POINTS = {
 }
 
 function App() {
-  // Views: 'start' | 'lobby' | 'story-prep' | 'classic-prep' | 'battle' | 'result'
-  const [view, setView] = useState('start')
+  // Views: 'loading' | 'start' | 'lobby' | 'story-prep' | 'classic-prep' | 'battle' | 'result'
+  const [view, setView] = useState('loading')
   const [activeModal, setActiveModal] = useState(null)
   const [activeMode, setActiveMode] = useState('story') // 'story' | 'classic'
   const [classicLength, setClassicLength] = useState(3)
@@ -657,8 +658,8 @@ function App() {
 
   return (
     <div className={`start-screen view-${view} ${bgClass}`}>
-      {/* 1. Shared Background Visual Elements (only shown when not fighting or reviewing results) */}
-      {view !== 'battle' && view !== 'result' && (
+      {/* 1. Shared Background Visual Elements (only shown when not fighting or reviewing results, and not loading) */}
+      {view !== 'battle' && view !== 'result' && view !== 'loading' && (
         <>
           <div className="full-moon"></div>
           <div className="clouds-container">
@@ -691,6 +692,8 @@ function App() {
       {/* ==========================================
          VIEW SELECTOR
          ========================================== */}
+      {view === 'loading' && <LoadingScreen onComplete={() => setView('start')} />}
+
       {view === 'start' && <StartScreen openModal={openModal} />}
 
       {view === 'lobby' && (

@@ -2386,3 +2386,165 @@ body {
     font-size: 0.8rem !important;
   }
 }
+
+/* ==========================================
+   PERSONA 3 STYLE LOADING SCREEN
+   ========================================== */
+.loading-screen-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100dvh;
+  background-color: #03050c; /* Deep Persona midnight hour blue/black */
+  color: var(--color-text-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+/* Diagonal Background Accents (P3 Aesthetic) */
+.loading-bg-accents {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.loading-bg-line-1 {
+  position: absolute;
+  top: 30%;
+  left: -10%;
+  width: 120%;
+  height: 15px;
+  background: linear-gradient(90deg, transparent, var(--color-cyan), transparent);
+  transform: rotate(-15deg);
+  opacity: 0.2;
+}
+
+.loading-bg-line-2 {
+  position: absolute;
+  bottom: 35%;
+  right: -10%;
+  width: 120%;
+  height: 8px;
+  background: linear-gradient(90deg, transparent, var(--color-red), transparent);
+  transform: rotate(-15deg);
+  opacity: 0.15;
+}
+
+/* Center Content */
+.loading-center-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* Glowing Floating Butterfly */
+.loading-butterfly-wrapper {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  animation: float-slow 3s infinite ease-in-out;
+}
+
+.loading-butterfly-svg {
+  width: 70px;
+  height: 70px;
+  filter: drop-shadow(0 0 15px var(--color-cyan));
+  animation: pulse-butterfly 1.5s infinite ease-in-out;
+}
+
+/* LOADING... Text */
+.loading-text-main {
+  font-family: var(--font-game);
+  font-size: 2.2rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 6px;
+  color: var(--color-cyan);
+  text-shadow: 0 0 10px var(--color-cyan-glow);
+  margin-top: 10px;
+  font-style: italic;
+  animation: pulse-glow-text 1.5s infinite ease-in-out;
+}
+
+/* Progress bar container (Slanted P3 style) */
+.loading-progress-container {
+  width: 320px;
+  margin-top: 15px;
+  position: relative;
+}
+
+.loading-progress-bar-outer {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  transform: skewX(-15deg);
+  overflow: hidden;
+  position: relative;
+}
+
+.loading-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-cyan), #00d2ff);
+  box-shadow: 0 0 10px var(--color-cyan);
+  transition: width 0.1s ease-out;
+}
+
+/* Slanted progress percentage label */
+.loading-progress-percent {
+  position: absolute;
+  right: -5px;
+  top: -30px;
+  font-family: var(--font-game);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--color-text-light);
+  transform: skewX(-15deg);
+  text-shadow: 1px 1px 0 #000, 0 0 8px var(--color-cyan-glow);
+}
+
+/* Detail log text showing preloaded files */
+.loading-file-log {
+  font-size: 0.8rem;
+  font-family: monospace;
+  color: var(--color-text-dim);
+  opacity: 0.7;
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  margin-top: 15px;
+  letter-spacing: 0.5px;
+}
+
+/* Keyframes */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse-butterfly {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 12px var(--color-cyan)); }
+  50% { transform: scale(1.08) rotate(3deg); filter: drop-shadow(0 0 20px var(--color-cyan)); }
+}
+
+@keyframes pulse-glow-text {
+  0%, 100% { opacity: 0.8; }
+  50% { opacity: 1; text-shadow: 0 0 18px var(--color-cyan); }
+}
